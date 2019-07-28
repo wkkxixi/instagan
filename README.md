@@ -8,7 +8,24 @@ Our major contributions are in `./models/insta_gan_model.py` and `./models/netwo
 
 <img src='imgs/model.png'>
 
+## UPDATE
+### Run experiments
 
+- Train a model with visdom: `--display_id` set to 1
+ 
+```
+python -m visdom.server -p 8098
+no_proxy=localhost python train.py --dataroot ./datasets/pants2skirt_mhp --model insta_gan --name pants2skirt_mhp_instagan --loadSizeH 270 --loadSizeW 180 --fineSizeH 240 --fineSizeW 160 --display_id 1
+```
+
+- Train a model with tensorboard: `--display_id` set to 0, specify `--tensorboardx`, and assign an id `--id` 
+ 
+```
+python train.py --dataroot ./datasets/pants2skirt_mhp --model insta_gan --name pants2skirt_mhp_instagan --loadSizeH 270 --loadSizeW 180 --fineSizeH 240 --fineSizeW 160 --display_id 0 --tensorboardx --id [...]
+```
+To view the tensorboard, run the command `tensorboard --logdir checkpoints` and enter `http://localhost:6006` manually in browser. Note: donghao:6006 does not exist.
+
+- Run second program using another GPU: specify `--gpu_ids` with 0 or 1
 ## Getting Started
 ### Installation
 

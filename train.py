@@ -3,9 +3,19 @@ from options.train_options import TrainOptions
 from data import CreateDataLoader
 from models import create_model
 from util.visualizer import Visualizer
+from tensorboardX import SummaryWriter
+import os
 
 if __name__ == '__main__':
     opt = TrainOptions().parse()
+
+    # for writing loss to tensorboard
+    if opt.tensorboardx:
+        run_folder = os.path.join(os.path.join(opt.checkpoints_dir, opt.name),str(opt.id))
+        if not os.path.isdir(run_folder):
+            os.makedirs(run_folder)
+        writer = SummaryWriter(log_dir=run_folder)
+
     data_loader = CreateDataLoader(opt)
     dataset = data_loader.load_data()
     dataset_size = len(data_loader)
@@ -16,17 +26,17 @@ if __name__ == '__main__':
     visualizer = Visualizer(opt)
     total_steps = 0
 
-    for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
+    for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1): # epoch: 1 ~ (100+100+1)
         epoch_start_time = time.time()
         iter_data_time = time.time()
         epoch_iter = 0
 
-        for i, data in enumerate(dataset):
+        for i, data in enumerate(dataset): # 1759 images
             iter_start_time = time.time()
-            if total_steps % opt.print_freq == 0:
+            if total_steps % opt.print_freq == 0: # print loss info each 100 iterations
                 t_data = iter_start_time - iter_data_time
             visualizer.reset()
-            total_steps += opt.batch_size
+            total_steps += opt.batch_size # batch_size is 1
             epoch_iter += opt.batch_size
             model.set_input(data)
             model.optimize_parameters()
@@ -39,6 +49,16 @@ if __name__ == '__main__':
                 losses = model.get_current_losses()
                 t = (time.time() - iter_start_time) / opt.batch_size
                 visualizer.print_current_losses(epoch, epoch_iter, losses, t, t_data)
+
+                # write loss curve to tensorboard
+                if opt.tensorboardx:
+                    # combined verison (this should be correct)
+                    writer.add_scalars('loss/train_loss', losses, total_steps)
+
+                    # seperate version
+                    for k, v in losses.items():
+                        writer.add_scalar('loss/{}'.format(k), v, total_steps)
+
                 if opt.display_id > 0:
                     visualizer.plot_current_losses(epoch, float(epoch_iter) / dataset_size, opt, losses)
 
