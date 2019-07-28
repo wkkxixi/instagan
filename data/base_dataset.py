@@ -57,6 +57,41 @@ def get_transform(opt):
                                             (0.5, 0.5, 0.5))]
     return transforms.Compose(transform_list)
 
+def get_transform_for_seg(opt):
+    transform_list = []
+    # Modify transform to specify width and height
+    if opt.resize_or_crop == 'resize_and_crop':
+        osize = [opt.loadSizeH, opt.loadSizeW]
+        fsize = [opt.fineSizeH, opt.fineSizeW]
+        transform_list.append(transforms.Resize(osize, Image.BICUBIC))
+        transform_list.append(transforms.RandomCrop(fsize))
+    # Original CycleGAN code
+    # if opt.resize_or_crop == 'resize_and_crop':
+    #     osize = [opt.loadSize, opt.loadSize]
+    #     transform_list.append(transforms.Resize(osize, Image.BICUBIC))
+    #     transform_list.append(transforms.RandomCrop(opt.fineSize))
+    # elif opt.resize_or_crop == 'crop':
+    #     transform_list.append(transforms.RandomCrop(opt.fineSize))
+    # elif opt.resize_or_crop == 'scale_width':
+    #     transform_list.append(transforms.Lambda(
+    #         lambda img: __scale_width(img, opt.fineSize)))
+    # elif opt.resize_or_crop == 'scale_width_and_crop':
+    #     transform_list.append(transforms.Lambda(
+    #         lambda img: __scale_width(img, opt.loadSize)))
+    #     transform_list.append(transforms.RandomCrop(opt.fineSize))
+    # elif opt.resize_or_crop == 'none':
+    #     transform_list.append(transforms.Lambda(
+    #         lambda img: __adjust(img)))
+    else:
+        raise ValueError('--resize_or_crop %s is not a valid option.' % opt.resize_or_crop)
+
+    if opt.isTrain and not opt.no_flip:
+        transform_list.append(transforms.RandomHorizontalFlip())
+
+    transform_list += [transforms.ToTensor(),
+                       transforms.Normalize([0.5],
+                                            [0.5])]
+    return transforms.Compose(transform_list)
 
 # just modify the width and height to be multiple of 4
 def __adjust(img):

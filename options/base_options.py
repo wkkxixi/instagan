@@ -29,7 +29,7 @@ class BaseOptions():
         parser.add_argument('--netD', type=str, default='set', help='selects model to use for netD')
         parser.add_argument('--netG', type=str, default='set', help='selects model to use for netG')
         parser.add_argument('--n_layers_D', type=int, default=3, help='only used if netD==n_layers')
-        parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
+        parser.add_argument('--gpu_ids', type=str, default='0,1', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         parser.add_argument('--name', type=str, default='experiment_name', help='name of the experiment. It decides where to store samples and models')
         # Use unaligned_seg as a default dataset_mode
         parser.add_argument('--dataset_mode', type=str, default='unaligned_seg', help='chooses how datasets are loaded. [unaligned | aligned | single]')
@@ -117,6 +117,8 @@ class BaseOptions():
             id = int(str_id)
             if id >= 0:
                 opt.gpu_ids.append(id)
+        print('The GPU list is: {}'.format(opt.gpu_ids))
+        print('Cuda is available: {}'.format(torch.cuda.is_available()))
         if len(opt.gpu_ids) > 0:
             torch.cuda.set_device(opt.gpu_ids[0])
 
