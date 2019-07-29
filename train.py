@@ -24,7 +24,7 @@ if __name__ == '__main__':
     model = create_model(opt)
     model.setup(opt)
     visualizer = Visualizer(opt)
-    total_steps = 0
+    total_steps = 0 # the total number of training iterations
 
     for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1): # epoch: 1 ~ (100+100+1)
         epoch_start_time = time.time()
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
                 # write loss curve to tensorboard
                 if opt.tensorboardx:
-                    # combined verison (this should be correct)
+                    # combined verison  
                     writer.add_scalars('loss/train_loss', losses, total_steps)
 
                     # seperate version
@@ -62,13 +62,14 @@ if __name__ == '__main__':
                 if opt.display_id > 0:
                     visualizer.plot_current_losses(epoch, float(epoch_iter) / dataset_size, opt, losses)
 
-            if total_steps % opt.save_latest_freq == 0:
+            if total_steps % opt.save_latest_freq == 0: # save a model each 5000 iter
                 print('saving the latest model (epoch %d, total_steps %d)' % (epoch, total_steps))
                 save_suffix = 'iter_%d' % total_steps if opt.save_by_iter else 'latest'
                 model.save_networks(save_suffix)
 
             iter_data_time = time.time()
-        if epoch % opt.save_epoch_freq == 0:
+
+        if epoch % opt.save_epoch_freq == 0: # save a model each 5 epoch
             print('saving the model at the end of epoch %d, iters %d' % (epoch, total_steps))
             model.save_networks('latest')
             model.save_networks(epoch)
